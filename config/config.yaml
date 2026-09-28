@@ -1,0 +1,104 @@
+# config/config.yaml — RouteCache configuration
+# Companion to: SRS v1.1 Section 9, Detailed Design Document Section 7
+
+# ─── Model Definitions ───────────────────────────────────────────────
+# Each model needs: name (as the provider expects it), per-token prices,
+# the base URL of the OpenAI-compatible endpoint, and the env var holding
+# the API key.
+#
+# Prices below are PLACEHOLDERS — verify at console.groq.com/pricing
+# before any experiment run, and record the date you checked in your
+# experiment log.
+
+models:
+    small:
+      name: "openai/gpt-oss-20b"
+      price_in: 0.000000075
+      price_out: 0.0000003
+      base_url: "https://api.groq.com/openai/v1"
+      api_key_env: "SMALL_LLM"
+
+    large:
+      name: "openai/gpt-oss-120b"
+      price_in: 0.00000015
+      price_out: 0.0000006
+      base_url: "https://api.groq.com/openai/v1"
+      api_key_env: "LARGE_LLM"
+
+    judge:
+      name: "qwen/qwen3.8-27b"
+      price_in: 0.0000008
+      price_out: 0.000004
+      base_url: "https://api.groq.com/openai/v1"
+      api_key_env: "VERIFIER"
+
+# ─── Cache Settings ──────────────────────────────────────────────────
+# t_low / t_high define the three zones (SRS FR-2.2):
+#   similarity >= t_high         -> SERVE (direct hit)
+#   t_low <= similarity < t_high -> VERIFY (borderline, needs verification)
+#   similarity < t_low           -> MISS (no cache candidate)
+
+cache:
+    t_low: 0.82                      # tune — lower bound of verify zone
+    t_high: 0.93                     # tune — upper bound, above = direct serve
+    ttl_seconds: 604800              # 7 days — general entries
+    ttl_seconds_temporal: 86400      # 1 day — entries flagged as time-sensitive
+    eviction: "lru"                  # "lru" or "lfu"
+    max_entries: 100000              # NFR-1 target ceiling
+    top_k: 5                         # FAISS search returns top-k candidates
+
+# ─── Risk Feature Extraction ────────────────────────────────────────
+# policy: "fixed"    -> t_low/t_high used as-is for all queries
+# policy: "adaptive" -> thresholds tightened per query based on risk features (C2)
+
+risk:
+    policy: "fixed"                  # start with fixed, switch to adaptive in Step 9
+    adaptive_slope: 0.05             # tune — how much risk_score shifts thresholds
+    features:                        # which risk detectors are active
+      - "numbers"
+      - "negation"
+      - "entities"
+      - "code"
+      - "math"
+      - "temporal"
+
+# ─── Verifier Settings ──────────────────────────────────────────────
+# type: "cross_encoder" -> sentence-transformers CrossEncoder on paraphrase data
+# type: "nli"           -> bidirectional entailment (NLI model) — added later
+
+verifier:
+    type: "cross_encoder"
+    model_name: "cross-encoder/stsb-TinyBERT-L-4"   # small, CPU-friendly to start
+    pass_threshold: 0.85                            # tune — score above which candidate is SAFE
+    timeout_ms: 5000                                # max time before VerifierUnavailableError
+
+# ─── Router Settings ────────────────────────────────────────────────
+# model: which classifier predicts P(large_needed)
+# threshold: if P(large) >= threshold, route to large model
+
+router:
+    model: "logistic_regression"         # "logistic_regression" or "lightgbm"
+    threshold: 0.40                      # tune — P(large) decision boundary
+    model_path: "data/router_model.pkl"  # where the trained model is saved/loaded
+
+# ─── Decision Engine Settings ───────────────────────────────────────
+# penalty_lambda: weight on wrong-hit risk in the expected-cost formula (C3)
+# wrong_hit_ceiling: NFR-3 target — monitored, not enforced at request time
+
+decision:
+    penalty_lambda: 0.5              # MUST be tuned — never trust this default
+    wrong_hit_ceiling: 0.02          # 2% answer-level wrong-hit rate target
+    hard_query_threshold: 0.70       # P(large) above which a query is "hard"
+                                     # — triggers provenance override (Step 11)
+
+# ─── Logging ─────────────────────────────────────────────────────────
+logging:
+    level: "INFO"
+    db_path: "data/routecache.db"    # SQLite database for request_logs + cache_entries
+    json_log_path: "logs/requests.jsonl"  # structured JSON log lines
+
+# ─── Embedding Model ────────────────────────────────────────────────
+embedding:
+    model_name: "all-MiniLM-L6-v2"   # sentence-transformers, CPU, ~80MB
+    dimension: 384                   # output vector size for this model
+    normalize: true                  # L2-normalize embeddings (required for cosine sim with IndexFlat)

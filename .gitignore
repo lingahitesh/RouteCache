@@ -1,0 +1,59 @@
+# ================================
+# RouteCache .gitignore
+# ================================
+
+# ---- Python virtual environments ----
+.venv/
+venv/
+env/
+
+# ---- Python cache / compiled files ----
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ---- PyCharm ----
+.idea/
+
+# ---- VS Code ----
+.vscode/
+
+# ---- Environment variables / secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Local databases ----
+*.db
+*.sqlite
+*.sqlite3
+
+# ---- Logs ----
+logs/
+*.log
+
+# ---- Local model files / caches ----
+models/
+model_cache/
+.cache/
+huggingface_cache/
+
+# ---- Generated / downloaded datasets ----
+data/raw/
+data/processed/
+data/adversarial/
+
+# ---- Generated experiment results ----
+experiments/results/
+experiments/outputs/
+
+# ---- Jupyter ----
+.ipynb_checkpoints/
+
+# ---- OS-generated files ----
+.DS_Store
+Thumbs.db
+
+# ---- Temporary files ----
+*.tmp
+*.temp
