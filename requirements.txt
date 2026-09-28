@@ -1,4 +1,28 @@
+# Core
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 pydantic>=2.9.0
-requests>=2.32.0
+httpx>=0.27.0
+pyyaml>=6.0
+python-dotenv>=1.0
+
+# Embeddings + Verifier (Step 6, Step 8)
+sentence-transformers>=3.0.0
+faiss-cpu>=1.8.0
+
+# Risk features (Step 9)
+spacy>=3.7.0
+
+# Router (Step 10)
+scikit-learn>=1.5.0
+
+# Database (Step 5)
+# sqlite3 is stdlib — no extra dep needed
+
+# Evaluation (Step 13)
+matplotlib>=3.9.0
+pandas>=2.2.0
+scipy>=1.14.0
+
+# Testing
+pytest>=8.0.0
