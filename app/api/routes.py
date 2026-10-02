@@ -77,6 +77,20 @@ def chat_completions(request: ChatRequest):
 
     total_latency = (time.time() - start_time) * 1000
 
+    # ── Log the request (Step 5) ──
+    from app.logging_utils import log_request
+    log_request(
+        request_id=request_id,
+        query_text=request.messages[-1].content,  # last user message
+        cache_zone=None,  # no cache yet
+        route=f"{model_key}-model",
+        model_used=config.models[model_key].name,
+        cost_usd=cost_usd,
+        baseline_cost_usd=baseline_cost,
+        latency_model_ms=model_latency,
+        latency_total_ms=total_latency,
+    )
+
     # ── Build response ──
     return ChatResponse(
         id=request_id,
