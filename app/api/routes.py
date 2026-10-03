@@ -23,7 +23,8 @@ from app.api.models import (
 from app.cache.models import RequestContext, Provenance
 from app.cache.cache_manager import cache_zone, CacheManager
 from app.verifier.nli import NLIVerifier
-# Initialize cache manager singleton
+from app.risk.risk import extract, compute_risk_score, resolve_thresholds
+
 cache_manager = CacheManager()
 verifier = NLIVerifier()
 router = APIRouter()
@@ -74,18 +75,27 @@ def chat_completions(request: ChatRequest):
         if candidate:
             print(f"DEBUG: Found candidate for '{query_text[:40]}' - similarity={candidate.similarity:.4f}")
 
+    # ── Extract risk features (Step 9) ──
+    risk_start = time.time()
+    risk_features = extract(query_text)
+    risk_score = compute_risk_score(risk_features)
+    risk_ms = (time.time() - risk_start) * 1000
+
+    # ── Resolve thresholds (C2) ──
+    effective_t_low, effective_t_high = resolve_thresholds(
+        features=risk_features,
+        risk_score=risk_score,
+        base_t_low=config.cache.t_low,
+        base_t_high=config.cache.t_high,
+        policy=config.risk.policy,
+        adaptive_slope=config.risk.adaptive_slope,
+    )
+
+    # ── Three-zone check uses EFFECTIVE thresholds now ──
     if candidate:
-        zone = cache_zone(
-            candidate.similarity,
-            config.cache.t_low,
-            config.cache.t_high,
-        )
-        print(f"DEBUG: Zone={zone} (sim={candidate.similarity:.4f}, t_low={config.cache.t_low}, t_high={config.cache.t_high})")
+        zone = cache_zone(candidate.similarity, effective_t_low, effective_t_high)
     else:
         zone = "MISS"
-        print(f"DEBUG: No candidate found (empty index or no match)")
-
-        # In the route handler, after cache lookup determines zone == "VERIFY":
 
     if zone == "SERVE":
         # High similarity — serve directly, no verification needed
