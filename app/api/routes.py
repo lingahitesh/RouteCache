@@ -22,10 +22,10 @@ from app.api.models import (
 )
 from app.cache.models import RequestContext, Provenance
 from app.cache.cache_manager import cache_zone, CacheManager
-
+from app.verifier.nli import NLIVerifier
 # Initialize cache manager singleton
 cache_manager = CacheManager()
-
+verifier = NLIVerifier()
 router = APIRouter()
 
 # ── Load config and build adapters once at import time ──
@@ -85,18 +85,45 @@ def chat_completions(request: ChatRequest):
         zone = "MISS"
         print(f"DEBUG: No candidate found (empty index or no match)")
 
-    # ── Decision logic (Step 7: simplified, no verifier/router yet) ──
-    served_from_cache = False
-    answer_text = None
+        # In the route handler, after cache lookup determines zone == "VERIFY":
 
-    if zone in ("SERVE", "VERIFY"):
-        # Step 7: VERIFY behaves like SERVE (no verifier yet)
-        # Step 8 will add actual verification for the VERIFY zone
+    if zone == "SERVE":
+        # High similarity — serve directly, no verification needed
         answer_text = candidate.answer
         served_from_cache = True
-        cache_status = "hit" if zone == "SERVE" else "hit"  # becomes "verified_hit" in Step 8
+        cache_status = "hit"
 
-    else:
+    elif zone == "VERIFY":
+        # Borderline similarity — run verifier before serving
+        verifier_result = verifier.check(
+            new_query=query_text,
+            cached_query=candidate.query,
+        )
+        verify_ms = verifier_result.latency_ms
+
+        if verifier_result.verdict == "SAFE":
+            # Verification passed — serve the cached answer
+            answer_text = candidate.answer
+            served_from_cache = True
+            cache_status = "verified_hit"
+            # Update entry's verification status in metadata store
+            cache_manager.metadata.update_verification_status(
+                candidate.entry_id, "safe"
+            )
+        else:
+            # Verification FAILED — do NOT serve cached answer
+            # Fall through to model call (same as MISS)
+            zone = "VERIFY"  # keep zone for logging
+            cache_status = "miss"
+            # Mark entry as unsafe
+            cache_manager.metadata.update_verification_status(
+                candidate.entry_id, "unsafe"
+            )
+            # ... proceed to model call below ...
+
+    elif zone == "MISS":
+        # No cache candidate — call a model
+        # ... (existing model call logic from Step 7) ...
         # ── MISS: call a model ──
         model_key = "large"  # Step 10 adds routing
         if context.model_override and context.model_override in config.models:
