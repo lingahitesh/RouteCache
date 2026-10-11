@@ -25,12 +25,19 @@ models:
       base_url: "https://api.groq.com/openai/v1"
       api_key_env: "LARGE_LLM"
 
-    judge:
-      name: "qwen/qwen3.8-27b"
-      price_in: 0.0000008
-      price_out: 0.000004
-      base_url: "https://api.groq.com/openai/v1"
-      api_key_env: "VERIFIER"
+    judge1:
+      name: "gemini-3.5-flash-lite"
+      price_in: 0.0000003    # $0.30 per 1M input tokens
+      price_out: 0.0000025   # $2.50 per 1M output tokens
+      base_url: "https://generativelanguage.googleapis.com/v1beta"
+      api_key_env: "JUDGE1"
+
+    judge2:
+      name: "gemini-3.1-flash-lite"
+      price_in: 0.00000025   # $0.25 per 1M input tokens
+      price_out: 0.0000015   # $1.50 per 1M output tokens
+      base_url: "https://generativelanguage.googleapis.com/v1beta"
+      api_key_env: "JUDGE2"
 
 # ─── Cache Settings ──────────────────────────────────────────────────
 # t_low / t_high define the three zones (SRS FR-2.2):
@@ -52,8 +59,8 @@ cache:
 # policy: "adaptive" -> thresholds tightened per query based on risk features (C2)
 
 risk:
-    policy: "fixed"                  # start with fixed, switch to adaptive in Step 9
-    adaptive_slope: 0.05             # tune — how much risk_score shifts thresholds
+    policy: "adaptive"               # adaptive thresholds (C2) — tightens for risky queries
+    adaptive_slope: 0.15             # aggressively tighten for Tokyo 2020/2021 test case
     features:                        # which risk detectors are active
       - "numbers"
       - "negation"

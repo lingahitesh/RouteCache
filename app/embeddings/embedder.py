@@ -43,7 +43,7 @@ class Embedder:
         self.model_name = model_name
         self.normalize = normalize
         self.model = SentenceTransformer(model_name)
-        self.dimension = self.model.get_sentence_embedding_dimension()
+        self.dimension = self.model.get_embedding_dimension()
 
     def embed(self, text: str) -> np.ndarray:
         """

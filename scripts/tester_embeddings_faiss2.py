@@ -1,4 +1,4 @@
-# scripts/test_embeddings_faiss.py
+# scripts/tester_embeddings_faiss.py
 """
 Step 6 definition of done:
   - Embed and index 100 queries
@@ -11,8 +11,6 @@ from app.embeddings.embedder import Embedder
 from app.cache.faiss_index import FaissIndex
 import time
 
-embedder = Embedder()
-index = FaissIndex(dimension=embedder.dimension)
 
 # 100 diverse queries
 queries = [
@@ -128,21 +126,45 @@ queries = [
     "Why do objects fall toward Earth?",
 ]
 
-# Pad to 100 if needed
+# Pad to at least 100 queries if needed.
 while len(queries) < 100:
     queries.append(f"Generic question number {len(queries) + 1}")
 
-# Embed and index all 100
-print("Embedding 100 queries...")
-start = time.time()
-for i, q in enumerate(queries):
-    vec = embedder.embed(q)
-    index.add(entry_id=i, vector=vec)
-embed_time = (time.time() - start) * 1000
-print(f"  Total embed time: {embed_time:.0f} ms ({embed_time/100:.1f} ms/query)")
+# Initialize components.
+embedder = Embedder()
+index = FaissIndex(dimension=embedder.dimension)
+
+# --------------------------------------------------
+# 1. Batch-embed all queries
+# --------------------------------------------------
+print(f"Embedding {len(queries)} queries in a batch...")
+
+start = time.perf_counter()
+query_vectors = embedder.embed_batch(queries)
+embed_time_ms = (time.perf_counter() - start) * 1000
+
+print(
+    f"  Total embedding time: {embed_time_ms:.2f} ms "
+    f"({embed_time_ms / len(queries):.2f} ms/query)"
+)
+print(f"  Embedding matrix shape: {query_vectors.shape}")
+
+# --------------------------------------------------
+# 2. Index all vectors in FAISS
+# --------------------------------------------------
+start = time.perf_counter()
+
+for i, vector in enumerate(query_vectors):
+    index.add(entry_id=i, vector=vector)
+
+index_time_ms = (time.perf_counter() - start) * 1000
+
+print(f"  FAISS indexing time: {index_time_ms:.2f} ms")
 print(f"  Index size: {index.size} vectors")
 
-# 10 near-duplicate test queries (paraphrases of queries above)
+# --------------------------------------------------
+# 3. Define 10 near-duplicate test queries
+# --------------------------------------------------
 test_pairs = [
     ("How can I reverse a Python list?", "How do I reverse a list in Python?"),
     ("What's France's capital city?", "What is the capital of France?"),
@@ -156,18 +178,80 @@ test_pairs = [
     ("Define machine learning", "What is machine learning?"),
 ]
 
-print(f"\nSearching for 10 near-duplicates...")
-for query, expected_match in test_pairs:
-    vec, embed_ms = embedder.embed_timed(query)
-    results, faiss_ms = index.search_timed(vec, top_k=3)
+test_queries = [query for query, _ in test_pairs]
+
+# --------------------------------------------------
+# 4. Batch-embed all test queries
+# --------------------------------------------------
+test_start = time.perf_counter()
+test_vectors = embedder.embed_batch(test_queries)
+test_embed_time_ms = (time.perf_counter() - test_start) * 1000
+
+print(f"\nSearching for {len(test_pairs)} near-duplicates...")
+print(
+    f"  Test embedding time: {test_embed_time_ms:.2f} ms "
+    f"({test_embed_time_ms / len(test_queries):.2f} ms/query)"
+)
+
+# --------------------------------------------------
+# 5. Search FAISS and report results
+# --------------------------------------------------
+total_search_time_ms = 0.0
+ok_count = 0
+check_count = 0
+
+for i, (query, expected_match) in enumerate(test_pairs):
+    # Measure FAISS search only; embedding has already been done.
+    search_start = time.perf_counter()
+    results = index.search(test_vectors[i], top_k=3)
+    faiss_ms = (time.perf_counter() - search_start) * 1000
+
+    total_search_time_ms += faiss_ms
 
     top_id, top_score = results[0]
     matched_query = queries[top_id]
 
     status = "OK" if matched_query == expected_match else "CHECK"
-    print(f"  [{status}] \"{query[:40]}...\"")
-    print(f"         -> \"{matched_query[:40]}...\" (sim={top_score:.4f})")
-    print(f"         embed={embed_ms:.1f}ms  faiss={faiss_ms:.3f}ms")
 
-print(f"\nDone. Review the results above — every [OK] means the top result matched the expected query.")
-print(f"Any [CHECK] means the top result was different — inspect manually to see if it's still sensible.")
+    if status == "OK":
+        ok_count += 1
+    else:
+        check_count += 1
+
+    print(f'\n  [{status}] "{query}"')
+    print(f'         -> "{matched_query}" (sim={top_score:.4f})')
+    print(f'         Expected: "{expected_match}"')
+    print(f"         FAISS search: {faiss_ms:.3f} ms")
+
+# --------------------------------------------------
+# 6. Final summary
+# --------------------------------------------------
+print("\n--- Summary ---")
+print(f"  Indexed queries: {index.size}")
+print(f"  Initial embedding time: {embed_time_ms:.2f} ms")
+print(
+    f"  Average initial embedding latency: "
+    f"{embed_time_ms / len(queries):.2f} ms/query"
+)
+print(f"  FAISS indexing time: {index_time_ms:.2f} ms")
+print(f"  Test embedding time: {test_embed_time_ms:.2f} ms")
+print(
+    f"  Average test embedding latency: "
+    f"{test_embed_time_ms / len(test_queries):.2f} ms/query"
+)
+print(
+    f"  Average FAISS search latency: "
+    f"{total_search_time_ms / len(test_pairs):.3f} ms/query"
+)
+print(f"  Total near-duplicate tests: {len(test_pairs)}")
+print(f"  Exact expected matches [OK]: {ok_count}")
+print(f"  Results requiring inspection [CHECK]: {check_count}")
+
+print(
+    "\nDone. Review the results above — every [OK] means the top "
+    "result matched the expected query."
+)
+print(
+    "Any [CHECK] means the top result differed from the expected "
+    "query — inspect manually to see if it is still sensible."
+)

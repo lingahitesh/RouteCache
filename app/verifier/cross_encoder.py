@@ -30,6 +30,7 @@ import time
 from sentence_transformers import CrossEncoder as STCrossEncoder
 
 from config.config import load_config
+from app.risk.risk import NUMBER_PATTERN, TEMPORAL_PATTERN, NEGATION_PATTERN
 from app.verifier.base import VerifierResult
 
 
@@ -61,6 +62,29 @@ class CrossEncoderVerifier:
         # max_length=512 covers most query pairs; longer truncates
         self.model = STCrossEncoder(self.model_name, max_length=512)
 
+    @staticmethod
+    def _normalized_matches(pattern, text: str) -> list[str]:
+        """Extract normalized ordered signals for deterministic mismatch checks."""
+        return [match.group().strip().lower().replace(",", "") for match in pattern.finditer(text)]
+
+    def _deterministic_mismatch(self, new_query: str, cached_query: str) -> str | None:
+        """
+        Catch exact high-risk differences before semantic scoring.
+
+        Paraphrase models often rate "Tokyo in 2020" and "Tokyo in 2021" as
+        very similar, but the cache must treat changed numbers, dates, and
+        negation as unsafe.
+        """
+        checks = [
+            ("number_mismatch", NUMBER_PATTERN),
+            ("temporal_mismatch", TEMPORAL_PATTERN),
+            ("negation_mismatch", NEGATION_PATTERN),
+        ]
+        for reason, pattern in checks:
+            if self._normalized_matches(pattern, new_query) != self._normalized_matches(pattern, cached_query):
+                return reason
+        return None
+
     def check(self, new_query: str, cached_query: str) -> VerifierResult:
         """
         Check whether two queries are semantically equivalent.
@@ -81,6 +105,19 @@ class CrossEncoderVerifier:
               - latency_ms: time taken for the cross-encoder forward pass
         """
         start = time.time()
+
+        mismatch_reason = self._deterministic_mismatch(new_query, cached_query)
+        if mismatch_reason:
+            latency_ms = (time.time() - start) * 1000
+            return VerifierResult(
+                verdict="UNSAFE",
+                score=0.0,
+                detail={
+                    "paraphrase_score": 0.0,
+                    mismatch_reason: 1.0,
+                },
+                latency_ms=latency_ms,
+            )
 
         # Cross-encoder predict: takes a list of (sentence_a, sentence_b) pairs
         # Returns a list of scores

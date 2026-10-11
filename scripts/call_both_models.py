@@ -6,6 +6,7 @@ Confirm every call is written to data/recorded_outputs/.
 
 from config.config import load_config
 from app.adapters.adapters import GroqAdapter, RetryingAdapter
+from app.utils.paths import get_data_dir
 
 config = load_config()
 
@@ -34,9 +35,8 @@ print(f"  Estimated:  {r2.tokens_estimated}")
 print("=" * 60)
 
 # Verify disk cache
-from pathlib import Path
-cache_dir = Path("data/recorded_outputs")
+cache_dir = get_data_dir() / "recorded_outputs"
 files = list(cache_dir.glob("*.json"))
-print(f"\nDisk cache: {len(files)} responses saved in {cache_dir}/")
+print(f"\nDisk cache: {len(files)} responses saved in {cache_dir}")
 assert len(files) >= 2, "NFR-8 FAILED: responses not saved to disk!"
 print("NFR-8 check: PASSED — all responses written to disk.")

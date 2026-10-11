@@ -86,8 +86,19 @@ class CacheManager:
         max_id_row = db.execute("SELECT MAX(embedding_id) FROM cache_entries").fetchone()
         self._next_embedding_id = (max_id_row[0] + 1) if max_id_row[0] is not None else 0
         
-        # Rebuild FAISS index from existing database entries
-        self._rebuild_index_from_db()
+        # Try to load persisted FAISS index first
+        # NOTE: Persistence disabled for now - causes hangs on save
+        # TO DO: Implement async persistence or batch saves
+        # try:
+        #     from app.utils.paths import get_data_dir
+        #     faiss_path = get_data_dir() / "faiss_index.bin"
+        #     if faiss_path.exists():
+        #         print(f"DEBUG: Loading FAISS index from {faiss_path}", flush=True)
+        #         self.index.load(faiss_path)
+        #     else:
+        #         print("DEBUG: No persisted FAISS index found, starting with empty index", flush=True)
+        # except Exception as e:
+        #     print(f"WARNING: Failed to load FAISS index: {e}, starting with empty index", flush=True)
 
     def lookup(
         self,
@@ -234,16 +245,39 @@ class CacheManager:
         self.index.load()
     
     def _rebuild_index_from_db(self) -> None:
-        """Rebuild the in-memory FAISS index from existing database entries."""
+        """
+        Rebuild the in-memory FAISS index from existing database entries.
+        
+        IMPORTANT: We re-embed queries here because embeddings are not stored
+        in the database. This means the FAISS index is regenerated fresh on
+        every server restart.
+        
+        NOTE: This is a known limitation - embedding_id values in the database
+        refer to the FAISS index position, which must be rebuilt in the exact
+        same order. We use ORDER BY embedding_id to ensure consistency.
+        """
         db = get_db()
         rows = db.execute(
-            "SELECT id, query FROM cache_entries ORDER BY embedding_id"
+            "SELECT embedding_id, query FROM cache_entries ORDER BY embedding_id"
         ).fetchall()
         
         if not rows:
             return  # No entries to rebuild
         
-        # Re-embed all queries and add to FAISS
-        for entry_id, query in rows:
+        print(f"DEBUG: Rebuilding FAISS index from {len(rows)} database entries", flush=True)
+        
+        db = get_db()
+        rows = db.execute(
+            "SELECT embedding_id, query FROM cache_entries ORDER BY embedding_id"
+        ).fetchall()
+        
+        if not rows:
+            return  # No entries to rebuild
+        
+        print(f"DEBUG: Rebuilding FAISS index from {len(rows)} database entries", flush=True)
+        
+        # Re-embed all queries and add to FAISS using their ORIGINAL embedding_id
+        for embedding_id, query in rows:
             vector = self.embedder.embed(query)
-            self.index.add(entry_id=entry_id, vector=vector)
+            # Add at the SPECIFIC embedding_id position to maintain consistency
+            self.index.add_at_id(embedding_id=embedding_id, vector=vector)

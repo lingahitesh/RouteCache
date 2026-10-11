@@ -9,7 +9,7 @@ Build Plan: Step 7
 """
 
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,timezone
 
 from app.db.connection import get_db
 from app.cache.models import CacheCandidate, Provenance, RequestContext
@@ -54,7 +54,7 @@ class MetadataStore:
             ttl_seconds: Time-to-live in seconds.
         """
         db = get_db()
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expires = now + timedelta(seconds=ttl_seconds)
         context_hash = _hash_context(context.system_prompt, context.temperature)
 
@@ -92,7 +92,7 @@ class MetadataStore:
         # Check TTL expiry
         if row[13] is not None:   # ttl_expires_at
             expires = datetime.fromisoformat(row[13])
-            if datetime.utcnow() > expires:
+            if datetime.now(timezone.utc) > expires:
                 self.delete(entry_id)
                 return None
 
@@ -127,7 +127,7 @@ class MetadataStore:
             UPDATE cache_entries
             SET last_accessed_at = ?, access_count = access_count + 1
             WHERE id = ?
-        """, (datetime.utcnow().isoformat(), entry_id))
+        """, (datetime.now(timezone.utc).isoformat(), entry_id))
         db.commit()
 
     def update_verification_status(self, entry_id: int, status: str) -> None:
@@ -165,7 +165,7 @@ class MetadataStore:
 
     def candidates_for_eviction(self, policy: str, n: int) -> list[int]:
         """
-        Return entry_ids of the n best candidates for eviction.
+        Return entry_ids of the n best, candidates for eviction.
 
         Args:
             policy: "lru" (least recently used) or "lfu" (least frequently used)
@@ -192,7 +192,7 @@ class MetadataStore:
         Returns count of entries deleted.
         """
         db = get_db()
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         cursor = db.execute(
             "DELETE FROM cache_entries WHERE ttl_expires_at IS NOT NULL AND ttl_expires_at < ?",
             (now,)

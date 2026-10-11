@@ -5,6 +5,8 @@ import httpx
 import json
 import time
 from pathlib import Path
+# Save results
+from app.utils.paths import get_data_dir
 
 QUERIES = [
     "What is the capital of France?",
@@ -62,10 +64,10 @@ for i, query in enumerate(QUERIES, 1):
     # Groq free tier: ~30 req/min token limit. This ensures we stay well under.
     # Disk cache (Step 2) means cached responses return instantly without this delay.
     if i < len(QUERIES):  # Don't sleep after the last query
-        time.sleep(3)
+        time.sleep(2)
 
-# Save results
-output_path = Path("data/baseline_30_queries.json")
+
+output_path = get_data_dir() / "baseline_30_queries.json"
 output_path.parent.mkdir(parents=True, exist_ok=True)
 with open(output_path, "w") as f:
     json.dump(results, f, indent=2)

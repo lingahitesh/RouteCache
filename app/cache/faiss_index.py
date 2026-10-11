@@ -65,6 +65,26 @@ class FaissIndex:
         self.index.add(vector.reshape(1, -1))
         self._id_map.append(entry_id)
 
+    def add_at_id(self, embedding_id: int, vector: np.ndarray) -> None:
+        """
+        Add a vector at a specific embedding_id position.
+        Used when rebuilding the index from database entries.
+
+        Args:
+            embedding_id: The FAISS position (matches cache_entries.embedding_id).
+            vector:       1-D float32 array of shape (dimension,).
+        """
+        assert vector.shape == (self.dimension,), \
+            f"Expected ({self.dimension},), got {vector.shape}"
+        # Ensure _id_map has enough slots
+        while len(self._id_map) <= embedding_id:
+            self._id_map.append(-1)  # placeholder for gaps
+        
+        # FAISS expects 2D array: (1, dimension)
+        self.index.add(vector.reshape(1, -1))
+        # Store the embedding_id at its own position
+        self._id_map[embedding_id] = embedding_id
+
     def add_batch(self, entry_ids: list[int], vectors: np.ndarray) -> None:
         """
         Add multiple vectors at once (faster than one-by-one).
@@ -152,5 +172,6 @@ class FaissIndex:
         path = Path(path) if not isinstance(path, Path) else path
         self.index = faiss.read_index(str(path))
         import json
-        with open(path + ".ids.json", "r") as f:
+        ids_path = Path(str(path) + ".ids.json")
+        with open(ids_path, "r") as f:
             self._id_map = json.load(f)

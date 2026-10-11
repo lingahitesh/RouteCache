@@ -26,3 +26,5 @@ scipy>=1.14.0
 
 # Testing
 pytest>=8.0.0
+requests
+numpy

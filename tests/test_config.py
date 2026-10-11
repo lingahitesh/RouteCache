@@ -13,7 +13,8 @@ def test_models_section():
     cfg = load_config()
     assert "small" in cfg.models
     assert "large" in cfg.models
-    assert "judge" in cfg.models
+    assert "judge1" in cfg.models
+    assert "judge2" in cfg.models
     for name, model in cfg.models.items():
         assert isinstance(model, ModelConfig)
         assert isinstance(model.name, str) and len(model.name) > 0

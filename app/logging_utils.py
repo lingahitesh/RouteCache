@@ -16,7 +16,7 @@ import json
 import hashlib
 import logging
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.db.connection import get_db
 
@@ -101,7 +101,7 @@ def log_request(
 
         log_entry = {
             "request_id": request_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "query_hash": query_hash,
             "cache_zone": cache_zone,
             "similarity": similarity,

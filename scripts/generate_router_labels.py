@@ -19,7 +19,6 @@ import json
 import time
 from pathlib import Path
 import numpy as np
-
 from config.config import load_config
 from app.adapters.adapters import GroqAdapter, GeminiAdapter, RetryingAdapter
 from app.router.features import extract_router_features
@@ -72,22 +71,20 @@ for i, query in enumerate(queries):
     # Get both answers
     messages = [{"role": "user", "content": query}]
     r_small = small_adapter.call(messages)
-    time.sleep(2)
     r_large = large_adapter.call(messages)
-    time.sleep(2)
     # Judge: order A=small, B=large (use judge1)
     judge_msg_1 = [{"role": "user", "content": JUDGE_PROMPT.format(
         question=query, answer_a=r_small.text, answer_b=r_large.text
     )}]
     j1 = judge1_adapter.call(judge_msg_1, temperature=0.0)
-    time.sleep(4)
+    time.sleep(2)
     
     # Judge: order A=large, B=small (use judge2 for second opinion)
     judge_msg_2 = [{"role": "user", "content": JUDGE_PROMPT.format(
         question=query, answer_a=r_large.text, answer_b=r_small.text
     )}]
     j2 = judge2_adapter.call(judge_msg_2, temperature=0.0)
-    time.sleep(4)
+    time.sleep(2)
     # Parse verdicts
     v1 = j1.text.strip().upper()
     v2 = j2.text.strip().upper()

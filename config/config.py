@@ -73,7 +73,7 @@ class RouterConfig(BaseModel):
     """Model routing settings (SRS FR-3.1–FR-3.5)."""
     model: Literal["logistic_regression", "lightgbm"]
     threshold: float                   # P(large) decision boundary
-    model_path: str = "data/router_model.pkl"
+    model_path: str = "data/router_model.pkl"  # relative to project root
 
 
 # ─── Decision Engine ─────────────────────────────────────────────────
@@ -90,8 +90,8 @@ class DecisionConfig(BaseModel):
 class LoggingConfig(BaseModel):
     """Logging and database settings (SRS FR-6.4, NFR-9)."""
     level: str = "INFO"
-    db_path: str = "data/routecache.db"
-    json_log_path: str = "logs/requests.jsonl"
+    db_path: str = "data/routecache.db"  # relative to project root
+    json_log_path: str = "logs/requests.jsonl"  # relative to project root
 
 
 # ─── Embedding ────────────────────────────────────────────────────────
