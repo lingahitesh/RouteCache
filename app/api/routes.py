@@ -7,11 +7,13 @@ extraction, routing, and the joint decision engine.
 Step 12 adds graceful degradation: cache / verifier / router / provider
 failures are caught and routed to a safe fallback instead of crashing
 the request (NFR-5).
+Step 13 adds aggregate metrics: every completed request is recorded via
+metrics_recorder.record_request(), exposed at GET /metrics (FR-6.3).
 
 Step 14.6: Full unified pipeline with all components wired together.
 
-Traceability: FR-1.1, FR-1.2, NFR-5
-Build Plan: Step 4, Step 12, Step 14.6
+Traceability: FR-1.1, FR-1.2, NFR-5, FR-6.3
+Build Plan: Step 4, Step 12, Step 13, Step 14.6
 """
 
 import uuid
@@ -36,12 +38,13 @@ from app.logging_utils import log_request
 from app.errors import (
     VerifierUnavailableError, RouterUnavailableError, ProviderError,
 )
-from app.metrics.recorder import metrics_recorder
+from app.metrics.recorder import MetricsRecorder
 
 logger = logging.getLogger(__name__)
 
 cache_manager = CacheManager()
 decision_policy = create_decision_policy()
+metrics_recorder = MetricsRecorder()
 router = APIRouter()
 
 # ── Load config and build adapters once at import time ──
@@ -357,6 +360,19 @@ def chat_completions(request: ChatRequest):
         ),
     )
 
+    # ── Record aggregate metrics (Step 13, FR-6.3) — backs GET /metrics ──
+    metrics_recorder.record_request(
+        action=trace.action.value,
+        zone=zone,
+        cost_usd=cost_usd,
+        baseline_cost_usd=baseline_cost,
+        verifier_verdict=trace.verifier_result.verdict if trace.verifier_result else None,
+        latency_total_ms=total_latency,
+        latency_embed_ms=embed_ms,
+        latency_verify_ms=trace.verifier_result.latency_ms if trace.verifier_result else None,
+        latency_model_ms=model_latency_ms,
+    )
+
     # ── Log the request (Step 5, Section 8.6) ──
     log_request(
         request_id=request_id,
@@ -384,6 +400,19 @@ def chat_completions(request: ChatRequest):
     )
 
     return resp
+
+
+@router.get("/metrics")
+def get_metrics():
+    """
+    GET /metrics — live aggregate metrics.
+
+    Returns JSON with cost, cache stats, latency percentiles, and failure
+    counts, accumulated in-memory since the server started (or since the
+    last call to metrics_recorder.reset()).
+    Traceability: FR-6.3
+    """
+    return metrics_recorder.snapshot()
 
 
 @router.get("/health")
