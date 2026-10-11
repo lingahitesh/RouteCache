@@ -1,0 +1,344 @@
+[
+  {
+    "query_a": "What is the return policy for order 4471?",
+    "query_b": "What is the return policy for order 4472?",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.9892896413803101,
+    "zone": "VERIFY",
+    "risk_flags": [
+      "numbers",
+      "entities",
+      "code"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "How much RAM does the iPhone 15 have?",
+    "query_b": "How much RAM does the iPhone 14 have?",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.9528436660766602,
+    "zone": "VERIFY",
+    "risk_flags": [
+      "numbers"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "What is the price of product #1234?",
+    "query_b": "What is the price of product #1235?",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.9531172513961792,
+    "zone": "VERIFY",
+    "risk_flags": [
+      "numbers",
+      "entities",
+      "math"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "Compare Python 3.11 and 3.10 performance.",
+    "query_b": "Compare Python 3.12 and 3.11 performance.",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.971560001373291,
+    "zone": "VERIFY",
+    "risk_flags": [
+      "numbers",
+      "entities"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "What is 15 * 37?",
+    "query_b": "What is 15 * 38?",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.8894476294517517,
+    "zone": "VERIFY",
+    "risk_flags": [
+      "numbers",
+      "math"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "Can I return this item?",
+    "query_b": "Can I NOT return this item?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.9316519498825073,
+    "zone": "VERIFY",
+    "risk_flags": [
+      "negation",
+      "code"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "Is Python good for beginners?",
+    "query_b": "Is Python NOT good for beginners?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.9772888422012329,
+    "zone": "VERIFY",
+    "risk_flags": [
+      "negation",
+      "entities",
+      "code"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "Does this function handle null values?",
+    "query_b": "Does this function NOT handle null values?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.9878630638122559,
+    "zone": "SERVE",
+    "risk_flags": [
+      "negation",
+      "code"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "Should I use a database for this?",
+    "query_b": "Should I avoid using a database for this?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.9289891123771667,
+    "zone": "VERIFY",
+    "risk_flags": [
+      "code"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "Is it safe to delete this file?",
+    "query_b": "Is it NOT safe to delete this file?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.992526113986969,
+    "zone": "SERVE",
+    "risk_flags": [
+      "negation"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "What is the GDP of Japan?",
+    "query_b": "What is the GDP of China?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.7769008874893188,
+    "zone": "MISS",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "Who is the CEO of Google?",
+    "query_b": "Who is the CEO of Microsoft?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.7383332252502441,
+    "zone": "MISS",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "What language is Django written in?",
+    "query_b": "What language is Rails written in?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.6024513244628906,
+    "zone": "MISS",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "How do I install TensorFlow?",
+    "query_b": "How do I install PyTorch?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.568422794342041,
+    "zone": "MISS",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "What is the population of Tokyo?",
+    "query_b": "What is the population of Osaka?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "served_from_cache": true,
+    "correct": false,
+    "similarity": 0.84814453125,
+    "zone": "VERIFY",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "What was the population of India in 2020?",
+    "query_b": "What was the population of India in 2021?",
+    "label": "non_equivalent",
+    "category": "temporal",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.9620774984359741,
+    "zone": "VERIFY",
+    "risk_flags": [
+      "numbers",
+      "temporal"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "What is the latest version of Python as of 2024?",
+    "query_b": "What is the latest version of Python as of 2025?",
+    "label": "non_equivalent",
+    "category": "temporal",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.981969952583313,
+    "zone": "SERVE",
+    "risk_flags": [
+      "numbers",
+      "temporal"
+    ],
+    "verifier_verdict": "UNSAFE"
+  },
+  {
+    "query_a": "Who won the World Cup in 2018?",
+    "query_b": "Who won the World Cup in 2022?",
+    "label": "non_equivalent",
+    "category": "temporal",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.7843047976493835,
+    "zone": "MISS",
+    "risk_flags": [
+      "numbers",
+      "entities",
+      "temporal"
+    ],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "Is Python faster than JavaScript?",
+    "query_b": "Is JavaScript faster than Python?",
+    "label": "non_equivalent",
+    "category": "order_reversal",
+    "served_from_cache": true,
+    "correct": false,
+    "similarity": 0.9933521747589111,
+    "zone": "SERVE",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "Is React better than Angular?",
+    "query_b": "Is Angular better than React?",
+    "label": "non_equivalent",
+    "category": "order_reversal",
+    "served_from_cache": true,
+    "correct": false,
+    "similarity": 0.9941218495368958,
+    "zone": "SERVE",
+    "risk_flags": [
+      "entities"
+    ],
+    "verifier_verdict": "SAFE"
+  },
+  {
+    "query_a": "Sort a list in ascending order in Python.",
+    "query_b": "Sort a list in descending order in Python.",
+    "label": "non_equivalent",
+    "category": "code_variation",
+    "served_from_cache": true,
+    "correct": false,
+    "similarity": 0.9521064758300781,
+    "zone": "SERVE",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "Write a function that returns the maximum value.",
+    "query_b": "Write a function that returns the minimum value.",
+    "label": "non_equivalent",
+    "category": "code_variation",
+    "served_from_cache": false,
+    "correct": true,
+    "similarity": 0.7016953229904175,
+    "zone": "MISS",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "How do I reverse a list in Python?",
+    "query_b": "How can I reverse a Python list?",
+    "label": "equivalent",
+    "category": "true_paraphrase",
+    "served_from_cache": true,
+    "correct": true,
+    "similarity": 0.9791830778121948,
+    "zone": "SERVE",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "What is machine learning?",
+    "query_b": "Explain what ML is.",
+    "label": "equivalent",
+    "category": "true_paraphrase",
+    "served_from_cache": false,
+    "correct": false,
+    "similarity": 0.456173300743103,
+    "zone": "MISS",
+    "risk_flags": [],
+    "verifier_verdict": null
+  },
+  {
+    "query_a": "What is the capital of France?",
+    "query_b": "What city is the capital of France?",
+    "label": "equivalent",
+    "category": "true_paraphrase",
+    "served_from_cache": true,
+    "correct": true,
+    "similarity": 0.9607918858528137,
+    "zone": "SERVE",
+    "risk_flags": [],
+    "verifier_verdict": null
+  }
+]

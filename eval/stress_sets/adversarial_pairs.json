@@ -1,0 +1,177 @@
+[
+  {
+    "query_a": "What is the return policy for order 4471?",
+    "query_b": "What is the return policy for order 4472?",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "How much RAM does the iPhone 15 have?",
+    "query_b": "How much RAM does the iPhone 14 have?",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "What is the price of product #1234?",
+    "query_b": "What is the price of product #1235?",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Compare Python 3.11 and 3.10 performance.",
+    "query_b": "Compare Python 3.12 and 3.11 performance.",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "What is 15 * 37?",
+    "query_b": "What is 15 * 38?",
+    "label": "non_equivalent",
+    "category": "number_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Can I return this item?",
+    "query_b": "Can I NOT return this item?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Is Python good for beginners?",
+    "query_b": "Is Python NOT good for beginners?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Does this function handle null values?",
+    "query_b": "Does this function NOT handle null values?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Should I use a database for this?",
+    "query_b": "Should I avoid using a database for this?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Is it safe to delete this file?",
+    "query_b": "Is it NOT safe to delete this file?",
+    "label": "non_equivalent",
+    "category": "negation",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "What is the GDP of Japan?",
+    "query_b": "What is the GDP of China?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Who is the CEO of Google?",
+    "query_b": "Who is the CEO of Microsoft?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "What language is Django written in?",
+    "query_b": "What language is Rails written in?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "How do I install TensorFlow?",
+    "query_b": "How do I install PyTorch?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "What is the population of Tokyo?",
+    "query_b": "What is the population of Osaka?",
+    "label": "non_equivalent",
+    "category": "entity_swap",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "What was the population of India in 2020?",
+    "query_b": "What was the population of India in 2021?",
+    "label": "non_equivalent",
+    "category": "temporal",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "What is the latest version of Python as of 2024?",
+    "query_b": "What is the latest version of Python as of 2025?",
+    "label": "non_equivalent",
+    "category": "temporal",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Who won the World Cup in 2018?",
+    "query_b": "Who won the World Cup in 2022?",
+    "label": "non_equivalent",
+    "category": "temporal",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Is Python faster than JavaScript?",
+    "query_b": "Is JavaScript faster than Python?",
+    "label": "non_equivalent",
+    "category": "order_reversal",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Is React better than Angular?",
+    "query_b": "Is Angular better than React?",
+    "label": "non_equivalent",
+    "category": "order_reversal",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Sort a list in ascending order in Python.",
+    "query_b": "Sort a list in descending order in Python.",
+    "label": "non_equivalent",
+    "category": "code_variation",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "Write a function that returns the maximum value.",
+    "query_b": "Write a function that returns the minimum value.",
+    "label": "non_equivalent",
+    "category": "code_variation",
+    "expected_answer_differs": true
+  },
+  {
+    "query_a": "How do I reverse a list in Python?",
+    "query_b": "How can I reverse a Python list?",
+    "label": "equivalent",
+    "category": "true_paraphrase",
+    "expected_answer_differs": false
+  },
+  {
+    "query_a": "What is machine learning?",
+    "query_b": "Explain what ML is.",
+    "label": "equivalent",
+    "category": "true_paraphrase",
+    "expected_answer_differs": false
+  },
+  {
+    "query_a": "What is the capital of France?",
+    "query_b": "What city is the capital of France?",
+    "label": "equivalent",
+    "category": "true_paraphrase",
+    "expected_answer_differs": false
+  }
+]
